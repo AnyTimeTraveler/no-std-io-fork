@@ -1,4 +1,11 @@
-use core::{convert::From, fmt, result};
+use core::{convert::From, result, fmt};
+
+
+#[cfg(feature = "error_in_core")]
+use core::error;
+
+#[cfg(not(feature = "error_in_core"))]
+use crate::error;
 
 /// A specialized [`Result`] type for I/O operations.
 ///
@@ -51,7 +58,8 @@ pub struct Error {
     repr: Repr,
 }
 
-impl crate::error::Error for Error {}
+
+impl error::Error for Error {}
 
 impl fmt::Debug for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

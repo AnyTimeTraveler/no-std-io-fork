@@ -12,13 +12,21 @@
 // reconsider what crate these items belong in.
 
 #[allow(deprecated)]
+#[cfg(not(feature = "error_in_core"))]
 use core::alloc::LayoutErr;
 
+#[cfg(not(feature = "error_in_core"))]
 use core::any::TypeId;
+#[cfg(not(feature = "error_in_core"))]
 use core::fmt::{Debug, Display};
 
 #[cfg(feature = "alloc")]
+#[cfg(not(feature = "error_in_core"))]
 use alloc::{string::String, borrow::Cow, boxed::Box};
+
+
+#[cfg(feature = "error_in_core")]
+pub use core::error::Error;
 
 /// `Error` is a trait representing the basic expectations for error values,
 /// i.e., values of type `E` in [`Result<T, E>`]. Errors must describe
@@ -33,6 +41,8 @@ use alloc::{string::String, borrow::Cow, boxed::Box};
 /// implementation for debugging via `source` chains.
 ///
 /// [`Result<T, E>`]: Result
+
+#[cfg(not(feature = "error_in_core"))]
 pub trait Error: Debug + Display {
     /// The lower-level source of this error, if any.
     ///
@@ -98,6 +108,7 @@ pub trait Error: Debug + Display {
     }
 }
 
+#[cfg(not(feature = "error_in_core"))]
 mod private {
     // This is a hack to prevent `type_id` from being overridden by `Error`
     // implementations, since that can enable unsound downcasting.
@@ -105,7 +116,7 @@ mod private {
     pub struct Internal;
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl<'a, E: Error + 'a> From<E> for Box<dyn Error + 'a> {
     /// Converts a type of [`Error`] into a box of dyn [`Error`].
     ///
@@ -137,7 +148,7 @@ impl<'a, E: Error + 'a> From<E> for Box<dyn Error + 'a> {
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl<'a, E: Error + Send + Sync + 'a> From<E> for Box<dyn Error + Send + Sync + 'a> {
     /// Converts a type of [`Error`] + [`Send`] + [`Sync`] into a box of
     /// dyn [`Error`] + [`Send`] + [`Sync`].
@@ -175,7 +186,7 @@ impl<'a, E: Error + Send + Sync + 'a> From<E> for Box<dyn Error + Send + Sync + 
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl From<String> for Box<dyn Error + Send + Sync> {
     /// Converts a [`String`] into a box of dyn [`Error`] + [`Send`] + [`Sync`].
     ///
@@ -213,7 +224,7 @@ impl From<String> for Box<dyn Error + Send + Sync> {
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl From<String> for Box<dyn Error> {
     /// Converts a [`String`] into a box of dyn [`Error`].
     ///
@@ -234,7 +245,7 @@ impl From<String> for Box<dyn Error> {
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl<'a> From<&str> for Box<dyn Error + Send + Sync + 'a> {
     /// Converts a [`str`] into a box of dyn [`Error`] + [`Send`] + [`Sync`].
     ///
@@ -257,7 +268,7 @@ impl<'a> From<&str> for Box<dyn Error + Send + Sync + 'a> {
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl From<&str> for Box<dyn Error> {
     /// Converts a [`str`] into a box of dyn [`Error`].
     ///
@@ -278,7 +289,7 @@ impl From<&str> for Box<dyn Error> {
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl<'a, 'b> From<Cow<'b, str>> for Box<dyn Error + Send + Sync + 'a> {
     /// Converts a [`Cow`] into a box of dyn [`Error`] + [`Send`] + [`Sync`].
     ///
@@ -299,7 +310,7 @@ impl<'a, 'b> From<Cow<'b, str>> for Box<dyn Error + Send + Sync + 'a> {
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl<'a> From<Cow<'a, str>> for Box<dyn Error> {
     /// Converts a [`Cow`] into a box of dyn [`Error`].
     ///
@@ -320,32 +331,39 @@ impl<'a> From<Cow<'a, str>> for Box<dyn Error> {
 }
 
 // #[unstable(feature = "never_type", issue = "35121")]
-#[cfg(feature = "nightly")]
+#[cfg(all(feature = "nightly", not(feature = "error_in_core")))]
 impl Error for ! {}
 
 #[allow(deprecated)]
+#[cfg(not(feature = "error_in_core"))]
 impl Error for LayoutErr {}
 
+#[cfg(not(feature = "error_in_core"))]
 impl Error for core::str::ParseBoolError {}
 
+#[cfg(not(feature = "error_in_core"))]
 impl Error for core::str::Utf8Error {}
 
+#[cfg(not(feature = "error_in_core"))]
 impl Error for core::num::ParseIntError {}
 
+#[cfg(not(feature = "error_in_core"))]
 impl Error for core::num::TryFromIntError {}
 
+#[cfg(not(feature = "error_in_core"))]
 impl Error for core::array::TryFromSliceError {}
 
+#[cfg(not(feature = "error_in_core"))]
 impl Error for core::num::ParseFloatError {}
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl Error for alloc::string::FromUtf8Error {}
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl Error for alloc::string::FromUtf16Error {}
 
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl<T: Error> Error for Box<T> {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         Error::source(&**self)
@@ -353,6 +371,7 @@ impl<T: Error> Error for Box<T> {
 }
 
 // Copied from `any.rs`.
+#[cfg(not(feature = "error_in_core"))]
 impl dyn Error + 'static {
     /// Returns `true` if the boxed type is the same as `T`
     #[inline]
@@ -390,6 +409,7 @@ impl dyn Error + 'static {
     }
 }
 
+#[cfg(not(feature = "error_in_core"))]
 impl dyn Error + 'static + Send {
     /// Forwards to the method defined on the type `dyn Error`.
     #[inline]
@@ -410,6 +430,7 @@ impl dyn Error + 'static + Send {
     }
 }
 
+#[cfg(not(feature = "error_in_core"))]
 impl dyn Error + 'static + Send + Sync {
     /// Forwards to the method defined on the type `dyn Error`.
     #[inline]
@@ -430,7 +451,7 @@ impl dyn Error + 'static + Send + Sync {
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl dyn Error {
     #[inline]
     /// Attempts to downcast the box to a concrete type.
@@ -446,7 +467,7 @@ impl dyn Error {
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl dyn Error + Send {
     #[inline]
     /// Attempts to downcast the box to a concrete type.
@@ -459,7 +480,7 @@ impl dyn Error + Send {
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "error_in_core")))]
 impl dyn Error + Send + Sync {
     #[inline]
     /// Attempts to downcast the box to a concrete type.

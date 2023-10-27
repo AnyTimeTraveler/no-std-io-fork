@@ -16,6 +16,7 @@ default = []
 std = ["alloc"]
 alloc = []
 nightly = []
+error_in_core = []
 
 [package.metadata.docs.rs]
 features = ["nightly"]
